@@ -18,13 +18,16 @@ export function addItem(
   item: Omit<CartItem, 'quantity'>,
   qty: number = 1,
 ): CartItem[] {
+  if (qty <= 0) return items;
   const existing = items.find((i) => i.sku === item.sku);
   if (existing) {
-    return items.map((i) =>
-      i.sku === item.sku ? { ...i, quantity: clampQty(i.quantity + qty) } : i,
-    );
+    const merged = clampQty(existing.quantity + qty);
+    if (merged <= 0) return items;
+    return items.map((i) => (i.sku === item.sku ? { ...i, quantity: merged } : i));
   }
-  return [...items, { ...item, quantity: clampQty(qty) }];
+  const clamped = clampQty(qty);
+  if (clamped <= 0) return items;
+  return [...items, { ...item, quantity: clamped }];
 }
 
 export function setQuantity(items: CartItem[], sku: string, qty: number): CartItem[] {

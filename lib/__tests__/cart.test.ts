@@ -49,6 +49,16 @@ describe('addItem', () => {
     addItem(start, TEE, 1);
     expect(start).toEqual([line(TEE, 1)]);
   });
+
+  it('is a no-op when qty is 0', () => {
+    expect(addItem([], TEE, 0)).toEqual([]);
+    expect(addItem([line(TEE, 1)], TEE, 0)).toEqual([line(TEE, 1)]);
+  });
+
+  it('is a no-op when qty is negative', () => {
+    expect(addItem([], TEE, -1)).toEqual([]);
+    expect(addItem([line(TEE, 2)], TEE, -5)).toEqual([line(TEE, 2)]);
+  });
 });
 
 describe('setQuantity', () => {
@@ -77,6 +87,11 @@ describe('setQuantity', () => {
     const start = [line(TEE, 1)];
     setQuantity(start, TEE.sku, 4);
     expect(start).toEqual([line(TEE, 1)]);
+  });
+
+  it('is a no-op for an unknown SKU at qty 0', () => {
+    const start = [line(TEE, 1)];
+    expect(setQuantity(start, 'UNKNOWN', 0)).toEqual([line(TEE, 1)]);
   });
 });
 
