@@ -93,7 +93,7 @@ export function CartDrawer() {
                 <li key={item.sku} className={styles.line}>
                   <div className={styles.lineThumb}>
                     <Image
-                      src="/too-much-яром-too-much-долиною.jpg"
+                      src="/product1/too-much-яром-too-much-долиною.jpg"
                       alt=""
                       fill
                       sizes="80px"

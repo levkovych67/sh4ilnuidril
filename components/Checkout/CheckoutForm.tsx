@@ -151,7 +151,7 @@ export function CheckoutForm() {
       <div className={styles.order}>
         <div className={styles.thumbBtn}>
           <Image
-            src="/too-much-яром-too-much-долиною.jpg"
+            src="/product1/too-much-яром-too-much-долиною.jpg"
             alt=""
             fill
             sizes="(min-width: 768px) 220px, 33vw"
