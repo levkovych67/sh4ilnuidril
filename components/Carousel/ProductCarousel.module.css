@@ -1,0 +1,43 @@
+/* The stage fills the space between Header and Footer. Pagination dots and
+   chevrons (added later) live here as absolutely-positioned siblings of the
+   scroller so they stay in the viewport while .scroller scrolls. */
+.stage {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  position: relative;
+}
+
+.scroller {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.scroller::-webkit-scrollbar { display: none; }
+
+.slide {
+  flex: 0 0 100%;
+  height: 100%;
+  position: relative;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  display: block;
+}
+
+/* Video fills its slide; cover-crop matches the prior single-video behaviour.
+   var(--bg) shows for the brief moment before the first frame paints. */
+.slideVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--bg);
+  display: block;
+}
+@media (min-width: 768px) {
+  .slideVideo { object-position: 50% 25%; }
+}

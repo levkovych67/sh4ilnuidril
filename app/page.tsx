@@ -2,13 +2,12 @@ import { CartProvider } from '@/components/Cart/CartProvider';
 import { CartDrawer } from '@/components/Cart/CartDrawer';
 import { CheckoutProvider } from '@/components/Checkout/CheckoutProvider';
 import { Header } from '@/components/Header/Header';
-import { BuyOverlay } from '@/components/BuyOverlay/BuyOverlay';
 import { Footer } from '@/components/Footer/Footer';
+import { ProductCarousel } from '@/components/Carousel/ProductCarousel';
 import { PRODUCTS } from '@/lib/catalog';
 import styles from './page.module.css';
 
 export default function Home() {
-  const featured = PRODUCTS[0];
   return (
     <CartProvider>
       <CheckoutProvider>
@@ -17,18 +16,7 @@ export default function Home() {
             too much яром too much долиною — оверсайз-футболка Sasha Chemerov × Димна Суміш, Drop 01
           </h1>
           <Header />
-          <video
-            className={styles.fill}
-            src={featured.videoSrc}
-            poster={featured.posterSrc}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            aria-hidden="true"
-          />
-          <BuyOverlay product={featured} />
+          <ProductCarousel products={PRODUCTS} />
           <Footer />
         </main>
         <CartDrawer />

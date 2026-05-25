@@ -1,0 +1,23 @@
+/* /v2 — locked to a single viewport, no scroll on any device.
+   position:fixed pulls <main> out of flow, so the shared globals.css
+   body padding-bottom (mobile) can't reintroduce a scrollbar here. */
+.page {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
