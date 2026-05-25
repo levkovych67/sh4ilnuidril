@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
-import { PRODUCT } from '@/lib/config';
-import { MAX_QUANTITY as CART_MAX } from '@/lib/cart';
+import { findProduct } from '@/lib/catalog';
 import type { CheckoutInput } from '@/lib/types';
 import { validateCheckout } from '@/lib/validateCheckout';
 import { useCart } from '@/components/Cart/CartProvider';
@@ -12,10 +11,7 @@ import styles from './CheckoutModal.module.css';
 import { NovaPoshtaPicker } from './NovaPoshtaPicker';
 
 type FieldKey = keyof CheckoutInput;
-
-// Local state holds every CheckoutInput field except `quantity`.
-// `quantity` is derived from the cart on every render — single source of truth.
-type LocalState = Omit<CheckoutInput, 'quantity'>;
+type LocalState = Omit<CheckoutInput, 'items'>;
 
 const EMPTY: LocalState = {
   fullName: '',
@@ -30,16 +26,8 @@ const EMPTY: LocalState = {
   flat: '',
 };
 
-// Upper bound for the stepper — mirrored from the cart, which mirrors the
-// server-side clamp in /api/checkout.
-const MAX_QUANTITY = CART_MAX;
-
 type ZoomTarget = 'front' | 'back' | null;
 
-/**
- * Normalises any user input into the Ukrainian "+380XXXXXXXXX" form.
- * (Behaviour unchanged from the pre-cart version.)
- */
 function formatUkrainianPhone(raw: string, prev: string): string {
   if (raw === '') return '';
   if (raw.length < prev.length && raw.length < 4) return '';
@@ -57,19 +45,15 @@ function formatUkrainianPhone(raw: string, prev: string): string {
 
 export function CheckoutForm() {
   const cart = useCart();
-  // Derived: cart is the source of truth. Fallback to 1 if cart is empty
-  // (shouldn't happen given the flows, but keeps the form usable in isolation).
-  const quantity = cart.totalQuantity > 0 ? cart.totalQuantity : 1;
-
   const [local, setLocal] = useState<LocalState>(EMPTY);
   const [submitting, setSubmitting] = useState(false);
   const [zoomed, setZoomed] = useState<ZoomTarget>(null);
   const [touched, setTouched] = useState<Partial<Record<FieldKey, boolean>>>({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
-  const priceRef = useRef<HTMLSpanElement>(null);
 
-  // Full CheckoutInput for validation and submission.
-  const data: CheckoutInput = { ...local, quantity };
+  // Items are derived from the cart — the form does not own them.
+  const items = cart.items.map((i) => ({ sku: i.sku, quantity: i.quantity }));
+  const data: CheckoutInput = { ...local, items };
 
   const markTouched = (k: FieldKey) =>
     setTouched((t) => (t[k] ? t : { ...t, [k]: true }));
@@ -81,24 +65,6 @@ export function CheckoutForm() {
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocal((d) => ({ ...d, phone: formatUkrainianPhone(e.target.value, d.phone) }));
-  };
-
-  // ± now writes through the cart. The pulse animation stays.
-  const handleIncrease = () => {
-    cart.setQty(PRODUCT.sku, quantity + 1);
-    if (typeof window === 'undefined') return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    priceRef.current?.animate(
-      [{ transform: 'scale(1)' }, { transform: 'scale(1.2)' }, { transform: 'scale(1)' }],
-      { duration: 320, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' },
-    );
-  };
-
-  const handleDecrease = () => {
-    // Never drop below 1 from the form's stepper — to clear the cart entirely,
-    // the user uses the cart drawer's × button.
-    if (quantity <= 1) return;
-    cart.setQty(PRODUCT.sku, quantity - 1);
   };
 
   useEffect(() => {
@@ -115,7 +81,10 @@ export function CheckoutForm() {
   const visibleError = (k: FieldKey): string | undefined =>
     errors[k] && (touched[k] || submitAttempted) ? errors[k] : undefined;
 
-  const total = PRODUCT.price * quantity;
+  // Single-thumb summary for now: shows whichever item is first in the cart.
+  // Task 5 replaces this with a per-line list.
+  const firstItem = cart.items[0];
+  const firstProduct = firstItem ? findProduct(firstItem.sku) : undefined;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -135,9 +104,6 @@ export function CheckoutForm() {
       const params = await res.json();
       if (!window.Wayforpay) throw new Error('widget not loaded');
       new window.Wayforpay().run(params);
-      // Clear the cart at the moment we hand off to WayForPay. If the user
-      // cancels the widget, they re-add via the hero — acceptable for a
-      // single-SKU site.
       cart.clear();
     } catch {
       alert('Не вдалося почати оплату. Спробуйте ще раз.');
@@ -149,21 +115,25 @@ export function CheckoutForm() {
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <div className={styles.order}>
-        <div className={styles.thumbBtn}>
-          <Image
-            src="/product1/too-much-яром-too-much-долиною.jpg"
-            alt=""
-            fill
-            sizes="(min-width: 768px) 220px, 33vw"
-            className={styles.thumb}
-          />
-        </div>
+        {firstProduct && (
+          <div className={styles.thumbBtn}>
+            <Image
+              src={firstProduct.imageSrc}
+              alt=""
+              fill
+              sizes="(min-width: 768px) 220px, 33vw"
+              className={styles.thumb}
+            />
+          </div>
+        )}
 
         <div className={styles.orderInfo}>
           <div className={styles.orderName}>
             <span>TOO MUCH ЯРОМ TOO MUCH ДОЛИНОЮ</span>
           </div>
-          <div className={`${styles.orderMeta} mono`}>OVERSIZE · ОДИН РОЗМІР · ×{quantity}</div>
+          <div className={`${styles.orderMeta} mono`}>
+            OVERSIZE · ОДИН РОЗМІР · ×{cart.totalQuantity}
+          </div>
         </div>
       </div>
 
@@ -221,51 +191,9 @@ export function CheckoutForm() {
         />
       </fieldset>
 
-      <div className={styles.payRow}>
-        <button
-          type="button"
-          className={styles.qtyBtn}
-          aria-disabled={!valid || submitting || quantity <= 1}
-          onClick={() => {
-            if (submitting) return;
-            if (!valid) {
-              setSubmitAttempted(true);
-              return;
-            }
-            if (quantity <= 1) return;
-            handleDecrease();
-          }}
-          aria-label="Зменшити кількість"
-        >
-          −
-        </button>
-        <button type="submit" className={styles.pay} aria-disabled={!valid || submitting}>
-          {submitting ? (
-            'ЗАЧЕКАЙТЕ…'
-          ) : (
-            <span ref={priceRef} className={styles.payAmount}>
-              {total} ₴ (×{quantity})
-            </span>
-          )}
-        </button>
-        <button
-          type="button"
-          className={styles.qtyBtn}
-          aria-disabled={!valid || submitting || quantity >= MAX_QUANTITY}
-          onClick={() => {
-            if (submitting) return;
-            if (!valid) {
-              setSubmitAttempted(true);
-              return;
-            }
-            if (quantity >= MAX_QUANTITY) return;
-            handleIncrease();
-          }}
-          aria-label="Збільшити кількість"
-        >
-          +
-        </button>
-      </div>
+      <button type="submit" className={styles.pay} aria-disabled={!valid || submitting}>
+        {submitting ? 'ЗАЧЕКАЙТЕ…' : `${cart.totalAmount} ₴`}
+      </button>
 
       {zoomed &&
         typeof document !== 'undefined' &&
@@ -279,7 +207,7 @@ export function CheckoutForm() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={zoomed === 'front' ? '/front.webp' : '/back.webp'}
-              alt={PRODUCT.name}
+              alt="t-shirt"
               className={styles.zoomImage}
               onClick={(e) => e.stopPropagation()}
             />
