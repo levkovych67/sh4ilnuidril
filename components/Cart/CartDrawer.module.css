@@ -61,22 +61,6 @@
 }
 .emptyTitle { font-size: 16px; color: #c1baac; }
 .emptySub { font-size: 10px; color: #6a6a6a; max-width: 260px; }
-.emptyAdd {
-  margin-top: 14px;
-  padding: 14px 28px;
-  background: transparent;
-  border: 1.5px solid #c1baac;
-  color: #c1baac;
-  font-family: var(--font-oswald), sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-  transition: background 160ms ease, color 160ms ease;
-}
-.emptyAdd:hover { background: #c1baac; color: var(--ink); }
-
 /* ---------- Line items ---------- */
 .list { list-style: none; margin: 18px 0 0; padding: 0; }
 .line {

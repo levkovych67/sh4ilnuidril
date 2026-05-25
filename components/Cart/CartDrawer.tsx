@@ -4,14 +4,14 @@ import { useEffect, useId, useState } from 'react';
 import Image from 'next/image';
 import { useCart } from './CartProvider';
 import { useCheckout } from '@/components/Checkout/CheckoutProvider';
-import { PRODUCT } from '@/lib/config';
+import { findProduct } from '@/lib/catalog';
 import { MAX_QUANTITY } from '@/lib/cart';
 import styles from './CartDrawer.module.css';
 
 const EXIT_MS = 420;
 
 export function CartDrawer() {
-  const { items, add, setQty, remove, totalAmount, isDrawerOpen, closeDrawer } = useCart();
+  const { items, setQty, remove, totalAmount, isDrawerOpen, closeDrawer } = useCart();
   const { open: openCheckout } = useCheckout();
   const [mounted, setMounted] = useState(false);
   const titleId = useId();
@@ -75,75 +75,70 @@ export function CartDrawer() {
             <div className={styles.empty}>
               <p className={styles.emptyTitle}>Кошик порожній</p>
               <p className={`${styles.emptySub} mono`}>
-                Додайте футболку, щоб оформити замовлення
+                Додайте товар з головної сторінки, щоб оформити замовлення
               </p>
-              <button
-                type="button"
-                className={styles.emptyAdd}
-                onClick={() =>
-                  add({ sku: PRODUCT.sku, name: PRODUCT.name, price: PRODUCT.price }, 1)
-                }
-              >
-                Додати футболку
-              </button>
             </div>
           ) : (
             <ul className={styles.list}>
-              {items.map((item) => (
-                <li key={item.sku} className={styles.line}>
-                  <div className={styles.lineThumb}>
-                    <Image
-                      src="/product1/too-much-яром-too-much-долиною.jpg"
-                      alt=""
-                      fill
-                      sizes="80px"
-                      className={styles.lineImg}
-                    />
-                  </div>
-                  <div className={styles.lineInfo}>
-                    <div className={styles.lineName}>{item.name}</div>
-                    <div className={`${styles.lineSpec} mono`}>OVERSIZE · ОДИН РОЗМІР</div>
-                  </div>
-                  <div className={styles.lineControls}>
-                    <div className={styles.stepper}>
+              {items.map((item) => {
+                const product = findProduct(item.sku);
+                if (!product) return null;
+                return (
+                  <li key={item.sku} className={styles.line}>
+                    <div className={styles.lineThumb}>
+                      <Image
+                        src={product.imageSrc}
+                        alt=""
+                        fill
+                        sizes="80px"
+                        className={styles.lineImg}
+                      />
+                    </div>
+                    <div className={styles.lineInfo}>
+                      <div className={styles.lineName}>{item.name}</div>
+                      <div className={`${styles.lineSpec} mono`}>OVERSIZE · ОДИН РОЗМІР</div>
+                    </div>
+                    <div className={styles.lineControls}>
+                      <div className={styles.stepper}>
+                        <button
+                          type="button"
+                          className={styles.qtyBtn}
+                          onClick={() => {
+                            if (item.quantity <= 1) return;
+                            setQty(item.sku, item.quantity - 1);
+                          }}
+                          aria-disabled={item.quantity <= 1}
+                          aria-label="Зменшити кількість"
+                        >
+                          −
+                        </button>
+                        <span className={styles.qty}>{item.quantity}</span>
+                        <button
+                          type="button"
+                          className={styles.qtyBtn}
+                          onClick={() => {
+                            if (item.quantity >= MAX_QUANTITY) return;
+                            setQty(item.sku, item.quantity + 1);
+                          }}
+                          aria-disabled={item.quantity >= MAX_QUANTITY}
+                          aria-label="Збільшити кількість"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <div className={styles.lineTotal}>{item.price * item.quantity} ₴</div>
                       <button
                         type="button"
-                        className={styles.qtyBtn}
-                        onClick={() => {
-                          if (item.quantity <= 1) return;
-                          setQty(item.sku, item.quantity - 1);
-                        }}
-                        aria-disabled={item.quantity <= 1}
-                        aria-label="Зменшити кількість"
+                        className={styles.lineRemove}
+                        onClick={() => remove(item.sku)}
+                        aria-label="Видалити з кошика"
                       >
-                        −
-                      </button>
-                      <span className={styles.qty}>{item.quantity}</span>
-                      <button
-                        type="button"
-                        className={styles.qtyBtn}
-                        onClick={() => {
-                          if (item.quantity >= MAX_QUANTITY) return;
-                          setQty(item.sku, item.quantity + 1);
-                        }}
-                        aria-disabled={item.quantity >= MAX_QUANTITY}
-                        aria-label="Збільшити кількість"
-                      >
-                        +
+                        ×
                       </button>
                     </div>
-                    <div className={styles.lineTotal}>{item.price * item.quantity} ₴</div>
-                    <button
-                      type="button"
-                      className={styles.lineRemove}
-                      onClick={() => remove(item.sku)}
-                      aria-label="Видалити з кошика"
-                    >
-                      ×
-                    </button>
-                  </div>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

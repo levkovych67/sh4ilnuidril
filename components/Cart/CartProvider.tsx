@@ -17,6 +17,7 @@ import {
   totalQuantity as sumQty,
   type CartItem,
 } from '@/lib/cart';
+import { findProduct } from '@/lib/catalog';
 
 const STORAGE_KEY = 'sasha-cart-v1';
 
@@ -65,7 +66,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (!raw) return;
       const parsed: unknown = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.every(isCartItem)) {
-        setItems(parsed);
+        // Drop items whose SKU is no longer in the catalog (deleted product,
+        // moved asset path, etc.). Prevents phantom lines in the drawer.
+        const valid = parsed.filter((item) => findProduct(item.sku));
+        setItems(valid);
       }
     } catch {
       /* keep empty cart */
