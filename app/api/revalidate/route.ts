@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   if (req.headers.get('Authorization') !== expected) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
-  revalidateTag('products');
+  revalidateTag('products', { expire: 0 });
   return NextResponse.json({
     revalidated: true,
     tag: 'products',
