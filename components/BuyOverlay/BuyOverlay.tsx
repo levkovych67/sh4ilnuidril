@@ -6,13 +6,14 @@ import { PRODUCT } from '@/lib/config';
 import styles from './BuyOverlay.module.css';
 
 export function BuyOverlay() {
-  const { add, openDrawer, totalQuantity } = useCart();
+  const { add, openDrawer, closeDrawer, totalQuantity } = useCart();
   const { open: openCheckout } = useCheckout();
 
   function handleBuyNow() {
     if (totalQuantity === 0) {
       add({ sku: PRODUCT.sku, name: PRODUCT.name, price: PRODUCT.price }, 1);
     }
+    closeDrawer();
     openCheckout();
   }
 

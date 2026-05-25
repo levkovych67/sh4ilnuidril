@@ -109,7 +109,10 @@ export function CartDrawer() {
                       <button
                         type="button"
                         className={styles.qtyBtn}
-                        onClick={() => setQty(item.sku, item.quantity - 1)}
+                        onClick={() => {
+                          if (item.quantity <= 1) return;
+                          setQty(item.sku, item.quantity - 1);
+                        }}
                         aria-disabled={item.quantity <= 1}
                         aria-label="Зменшити кількість"
                       >
@@ -119,7 +122,10 @@ export function CartDrawer() {
                       <button
                         type="button"
                         className={styles.qtyBtn}
-                        onClick={() => setQty(item.sku, item.quantity + 1)}
+                        onClick={() => {
+                          if (item.quantity >= MAX_QUANTITY) return;
+                          setQty(item.sku, item.quantity + 1);
+                        }}
                         aria-disabled={item.quantity >= MAX_QUANTITY}
                         aria-label="Збільшити кількість"
                       >
