@@ -49,7 +49,7 @@ function productLd(sku: string, name: string, price: number, currency: string, i
     name,
     sku,
     brand: { '@type': 'Brand', name: 'Sasha Chemerov × Димна Суміш' },
-    image: [`${SITE_URL}${imagePath}`],
+    image: [`${SITE_URL}${encodeURI(imagePath)}`],
     description:
       'Оверсайз-футболка "too much яром too much долиною" — лімітований дроп Sasha Chemerov × Димна Суміш.',
     offers: {
