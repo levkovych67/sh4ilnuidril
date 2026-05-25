@@ -1,0 +1,87 @@
+/* Font experiment slot — change the src URL to try a different weight. */
+@font-face {
+  font-family: 'KyivTypeSans';
+  src: url('/fonts-new/KyivTypeSans-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Overlay above the video. Wrapper at the 75%-from-top mark; the inner
+   .buttons box centres horizontally. pointer-events:none on the wrapper
+   keeps the empty area click-through-able. */
+.overlay {
+  position: absolute;
+  top: 75%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: center;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Stacked on mobile, side-by-side on desktop. */
+.buttons {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+}
+@media (min-width: 768px) {
+  .buttons {
+    flex-direction: row;
+    gap: 16px;
+    align-items: center;
+  }
+}
+
+/* Shared geometry for both buttons. */
+.buyPrimary,
+.buySecondary {
+  cursor: pointer;
+  font-family: 'KyivTypeSans', system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 28px;
+  padding: 22px 52px;
+  transition: background .25s var(--ease-out), color .25s var(--ease-out),
+              transform .2s var(--ease-out), border-color .25s var(--ease-out);
+  will-change: transform;
+}
+.buyPrimary:active,
+.buySecondary:active { transform: translateY(1px) scale(0.97); }
+.buyPrimary:hover,
+.buySecondary:hover { transform: translateY(-1.5px) scale(1.03); }
+
+/* Primary — filled beige, dark text. */
+.buyPrimary {
+  border: none;
+  background: rgba(220, 197, 163, 0.9);
+  color: var(--ink);
+}
+.buyPrimary:hover {
+  background: rgba(13, 13, 13, 0.9);
+  color: #dcc5a3;
+}
+
+/* Secondary — outlined beige, beige text. */
+.buySecondary {
+  background: transparent;
+  border: 1.5px solid rgba(220, 197, 163, 0.9);
+  color: rgba(220, 197, 163, 0.9);
+}
+.buySecondary:hover {
+  background: rgba(220, 197, 163, 0.9);
+  color: var(--ink);
+}
+
+@media (min-width: 768px) {
+  .buyPrimary,
+  .buySecondary {
+    font-size: 36px;
+    padding: 28px 68px;
+  }
+}
