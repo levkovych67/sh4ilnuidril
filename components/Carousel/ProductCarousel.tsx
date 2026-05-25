@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ProductSlide } from './ProductSlide';
 import { PaginationDots } from './PaginationDots';
 import { NavChevron } from './NavChevron';
-import type { Product } from '@/lib/catalog';
+import type { Product } from '@/lib/products';
 import styles from './ProductCarousel.module.css';
 
 export function ProductCarousel({ products }: { products: readonly Product[] }) {
@@ -82,7 +82,7 @@ export function ProductCarousel({ products }: { products: readonly Product[] }) 
       >
         {products.map((product, i) => (
           <ProductSlide
-            key={product.sku}
+            key={product.productId}
             product={product}
             ref={(el) => {
               slideRefs.current[i] = el;

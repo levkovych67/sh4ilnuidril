@@ -4,14 +4,13 @@ import { useEffect, useId, useState } from 'react';
 import Image from 'next/image';
 import { useCart } from './CartProvider';
 import { useCheckout } from '@/components/Checkout/CheckoutProvider';
-import { findProduct } from '@/lib/catalog';
 import { MAX_QUANTITY } from '@/lib/cart';
 import styles from './CartDrawer.module.css';
 
 const EXIT_MS = 420;
 
 export function CartDrawer() {
-  const { items, setQty, remove, totalAmount, isDrawerOpen, closeDrawer } = useCart();
+  const { items, setQty, remove, totalAmount, isDrawerOpen, closeDrawer, productsBySku } = useCart();
   const { open: openCheckout } = useCheckout();
   const [mounted, setMounted] = useState(false);
   const titleId = useId();
@@ -81,18 +80,21 @@ export function CartDrawer() {
           ) : (
             <ul className={styles.list}>
               {items.map((item) => {
-                const product = findProduct(item.sku);
+                const product = productsBySku.get(item.sku);
                 if (!product) return null;
+                const thumbUrl = product.productPictures[0]?.url;
                 return (
                   <li key={item.sku} className={styles.line}>
                     <div className={styles.lineThumb}>
-                      <Image
-                        src={product.imageSrc}
-                        alt=""
-                        fill
-                        sizes="80px"
-                        className={styles.lineImg}
-                      />
+                      {thumbUrl && (
+                        <Image
+                          src={thumbUrl}
+                          alt=""
+                          fill
+                          sizes="80px"
+                          className={styles.lineImg}
+                        />
+                      )}
                     </div>
                     <div className={styles.lineInfo}>
                       <div className={styles.lineName}>{item.name}</div>

@@ -17,7 +17,7 @@ import {
   totalQuantity as sumQty,
   type CartItem,
 } from '@/lib/cart';
-import { findProduct } from '@/lib/catalog';
+import type { Product } from '@/lib/products';
 
 const STORAGE_KEY = 'sasha-cart-v1';
 
@@ -43,6 +43,7 @@ interface CartContextValue {
   isDrawerOpen: boolean;
   openDrawer: () => void;
   closeDrawer: () => void;
+  productsBySku: Map<string, Product>;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -53,30 +54,36 @@ export function useCart() {
   return ctx;
 }
 
-export function CartProvider({ children }: { children: ReactNode }) {
+export function CartProvider({
+  products,
+  children,
+}: {
+  products: readonly Product[];
+  children: ReactNode;
+}) {
+  const productsBySku = useMemo(
+    () => new Map(products.map((p) => [p.productId, p])),
+    [products],
+  );
+
   const [items, setItems] = useState<CartItem[]>([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // Load on mount. Initial state is [] (matches SSR) — we hydrate after mount
-  // to avoid React hydration mismatch warnings. Silent on any failure
-  // (private mode, quota, corrupt JSON) — in-memory cart still works.
+  // Load on mount, filter by catalog membership (drops SKUs no longer in catalog).
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
       const parsed: unknown = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.every(isCartItem)) {
-        // Drop items whose SKU is no longer in the catalog (deleted product,
-        // moved asset path, etc.). Prevents phantom lines in the drawer.
-        const valid = parsed.filter((item) => findProduct(item.sku));
+        const valid = parsed.filter((item) => productsBySku.has(item.sku));
         setItems(valid);
       }
     } catch {
       /* keep empty cart */
     }
-  }, []);
+  }, [productsBySku]);
 
-  // Save on every change.
   useEffect(() => {
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
@@ -94,7 +101,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     (sku: string, qty: number) => setItems((prev) => setQuantity(prev, sku, qty)),
     [],
   );
-  const remove = useCallback((sku: string) => setItems((prev) => removeItem(prev, sku)), []);
+  const remove = useCallback(
+    (sku: string) => setItems((prev) => removeItem(prev, sku)),
+    [],
+  );
   const clear = useCallback(() => setItems([]), []);
   const openDrawer = useCallback(() => setIsDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setIsDrawerOpen(false), []);
@@ -111,9 +121,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
       isDrawerOpen,
       openDrawer,
       closeDrawer,
+      productsBySku,
     }),
-    [items, isDrawerOpen, add, setQty, remove, clear, openDrawer, closeDrawer],
+    [
+      items,
+      isDrawerOpen,
+      productsBySku,
+      add,
+      setQty,
+      remove,
+      clear,
+      openDrawer,
+      closeDrawer,
+    ],
   );
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+    </CartContext.Provider>
+  );
 }

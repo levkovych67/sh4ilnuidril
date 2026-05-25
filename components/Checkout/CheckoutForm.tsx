@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
-import { findProduct } from '@/lib/catalog';
 import { MAX_QUANTITY } from '@/lib/cart';
 import type { CheckoutInput } from '@/lib/types';
 import { validateCheckout } from '@/lib/validateCheckout';
@@ -52,7 +51,6 @@ export function CheckoutForm() {
   const [touched, setTouched] = useState<Partial<Record<FieldKey, boolean>>>({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
-  // Items are derived from the cart — the form does not own them.
   const items = cart.items.map((i) => ({ sku: i.sku, quantity: i.quantity }));
   const data: CheckoutInput = { ...local, items };
 
@@ -112,18 +110,21 @@ export function CheckoutForm() {
     <form className={styles.form} onSubmit={handleSubmit}>
       <ul className={styles.orderList}>
         {cart.items.map((item) => {
-          const product = findProduct(item.sku);
+          const product = cart.productsBySku.get(item.sku);
           if (!product) return null;
+          const thumbUrl = product.productPictures[0]?.url;
           return (
             <li key={item.sku} className={styles.orderLine}>
               <div className={styles.orderLineThumb}>
-                <Image
-                  src={product.imageSrc}
-                  alt=""
-                  fill
-                  sizes="80px"
-                  className={styles.orderLineImg}
-                />
+                {thumbUrl && (
+                  <Image
+                    src={thumbUrl}
+                    alt=""
+                    fill
+                    sizes="80px"
+                    className={styles.orderLineImg}
+                  />
+                )}
               </div>
               <div className={styles.orderLineInfo}>
                 <div className={styles.orderLineName}>{item.name}</div>

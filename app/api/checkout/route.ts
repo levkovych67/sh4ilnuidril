@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { purchaseSignature } from '@/lib/wayforpay';
 import { checkoutSchema } from '@/lib/checkoutSchema';
 import { SITE_URL, requireEnv } from '@/lib/config';
-import { findProduct, type Product } from '@/lib/catalog';
+import {
+  getProduct,
+  ProductNotFoundError,
+  ProductsApiError,
+  type Product,
+} from '@/lib/products';
 import { MAX_QUANTITY } from '@/lib/cart';
 
 interface LineItem {
@@ -20,12 +25,25 @@ export async function POST(req: NextRequest) {
   }
   const input = parsed.data;
 
-  // Per-line catalog lookup — the server is the authority on price.
   const lineItems: LineItem[] = [];
   for (const line of input.items) {
-    const product = findProduct(line.sku);
-    if (!product) {
-      return NextResponse.json({ error: 'unknown_sku', sku: line.sku }, { status: 400 });
+    let product: Product;
+    try {
+      product = await getProduct(line.sku);
+    } catch (err) {
+      if (err instanceof ProductNotFoundError) {
+        return NextResponse.json(
+          { error: 'unknown_sku', sku: line.sku },
+          { status: 400 },
+        );
+      }
+      if (err instanceof ProductsApiError) {
+        return NextResponse.json(
+          { error: 'products_api_unavailable' },
+          { status: 500 },
+        );
+      }
+      throw err;
     }
     lineItems.push({ product, quantity: Math.min(MAX_QUANTITY, line.quantity) });
   }
@@ -38,13 +56,12 @@ export async function POST(req: NextRequest) {
   const orderDate = Math.floor(Date.now() / 1000);
   const [lastName, ...firstParts] = input.fullName.trim().split(/\s+/);
 
-  const productName = lineItems.map((li) => `Футболка - ${li.product.name}`);
+  const productName = lineItems.map((li) => `Футболка - ${li.product.productName}`);
   const productCount = lineItems.map((li) => li.quantity);
-  const productPrice = lineItems.map((li) => li.product.price);
-  const amount = lineItems.reduce((s, li) => s + li.product.price * li.quantity, 0);
-  // All catalog products today are UAH; if mixed currencies become a thing,
-  // this needs explicit per-line handling. See spec §9.
-  const currency = lineItems[0].product.currency;
+  const productPrice = lineItems.map((li) => li.product.productPrice);
+  const amount = lineItems.reduce((s, li) => s + li.product.productPrice * li.quantity, 0);
+  // All catalog products today are UAH. Mixed-currency support is future work.
+  const currency = 'UAH';
 
   const base = {
     merchantAccount,

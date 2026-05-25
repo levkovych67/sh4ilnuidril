@@ -2,7 +2,7 @@
 
 import { forwardRef } from 'react';
 import { BuyOverlay } from '@/components/BuyOverlay/BuyOverlay';
-import type { Product } from '@/lib/catalog';
+import type { Product } from '@/lib/products';
 import styles from './ProductCarousel.module.css';
 
 export const ProductSlide = forwardRef<HTMLElement, { product: Product }>(
@@ -13,12 +13,12 @@ export const ProductSlide = forwardRef<HTMLElement, { product: Product }>(
         className={styles.slide}
         role="group"
         aria-roledescription="slide"
-        aria-label={product.name}
+        aria-label={product.productName}
       >
         <video
           className={styles.slideVideo}
-          src={product.videoSrc}
-          poster={product.posterSrc}
+          src={product.productVideoUrl}
+          poster={product.productVideoPosterUrl}
           autoPlay
           muted
           loop

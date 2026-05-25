@@ -2,25 +2,31 @@
 
 import { useCart } from '@/components/Cart/CartProvider';
 import { useCheckout } from '@/components/Checkout/CheckoutProvider';
-import type { Product } from '@/lib/catalog';
+import type { Product } from '@/lib/products';
 import styles from './BuyOverlay.module.css';
 
 export function BuyOverlay({ product }: { product: Product }) {
   const { add, openDrawer, closeDrawer, items } = useCart();
   const { open: openCheckout } = useCheckout();
 
-  const hasThisProduct = items.some((i) => i.sku === product.sku);
+  const hasThisProduct = items.some((i) => i.sku === product.productId);
 
   function handleBuyNow() {
     if (!hasThisProduct) {
-      add({ sku: product.sku, name: product.name, price: product.price }, 1);
+      add(
+        { sku: product.productId, name: product.productName, price: product.productPrice },
+        1,
+      );
     }
     closeDrawer();
     openCheckout();
   }
 
   function handleAddToCart() {
-    add({ sku: product.sku, name: product.name, price: product.price }, 1);
+    add(
+      { sku: product.productId, name: product.productName, price: product.productPrice },
+      1,
+    );
     openDrawer();
   }
 
