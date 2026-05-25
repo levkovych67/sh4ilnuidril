@@ -4,9 +4,11 @@ import { CheckoutProvider } from '@/components/Checkout/CheckoutProvider';
 import { Header } from '@/components/Header/Header';
 import { BuyOverlay } from '@/components/BuyOverlay/BuyOverlay';
 import { Footer } from '@/components/Footer/Footer';
+import { PRODUCTS } from '@/lib/catalog';
 import styles from './page.module.css';
 
 export default function Home() {
+  const featured = PRODUCTS[0];
   return (
     <CartProvider>
       <CheckoutProvider>
@@ -17,8 +19,8 @@ export default function Home() {
           <Header />
           <video
             className={styles.fill}
-            src="/product1/tshirt.mp4"
-            poster="/video.jpg"
+            src={featured.videoSrc}
+            poster={featured.posterSrc}
             autoPlay
             muted
             loop
@@ -26,7 +28,7 @@ export default function Home() {
             preload="metadata"
             aria-hidden="true"
           />
-          <BuyOverlay />
+          <BuyOverlay product={featured} />
           <Footer />
         </main>
         <CartDrawer />
