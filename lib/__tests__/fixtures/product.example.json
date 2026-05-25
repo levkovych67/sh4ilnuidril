@@ -1,0 +1,18 @@
+{
+  "productId": "drop-01-oversize",
+  "productName": "too much яром too much долиною",
+  "productDescription": "Оверсайз-футболка — лімітований дроп Sasha Chemerov × Димна Суміш.",
+  "productPrice": 2600,
+  "productVideoUrl": "/product1/tshirt.mp4",
+  "productVideoPosterUrl": "/video.jpg",
+  "productPictures": [
+    { "url": "/product1/too-much-яром-too-much-долиною.jpg", "alt": "Передня частина футболки" },
+    { "url": "/front.webp", "alt": "Передня крупним планом" },
+    { "url": "/back.webp", "alt": "Задня крупним планом" }
+  ],
+  "productBrand": "Sasha Chemerov × Димна Суміш",
+  "productAvailability": "in_stock",
+  "productButtonLabel": "ЗАБРАТИ",
+  "productButtonBackgroundColor": "#000000",
+  "productButtonFontColor": "#FAFAFA"
+}
