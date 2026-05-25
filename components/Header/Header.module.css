@@ -30,6 +30,10 @@
 }
 .cartButton:hover { color: #ffffff; }
 .cartButton:active { transform: scale(0.95); }
+.cartButton:focus-visible {
+  outline: 2px solid #c1baac;
+  outline-offset: 2px;
+}
 
 .cartBadge {
   position: absolute;
