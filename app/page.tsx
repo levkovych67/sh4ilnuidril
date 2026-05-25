@@ -1,4 +1,5 @@
 import { CartProvider } from '@/components/Cart/CartProvider';
+import { CartDrawer } from '@/components/Cart/CartDrawer';
 import { CheckoutProvider } from '@/components/Checkout/CheckoutProvider';
 import { Header } from '@/components/Header/Header';
 import { BuyOverlay } from '@/components/BuyOverlay/BuyOverlay';
@@ -28,6 +29,7 @@ export default function Home() {
           <BuyOverlay />
           <Footer />
         </main>
+        <CartDrawer />
       </CheckoutProvider>
     </CartProvider>
   );
