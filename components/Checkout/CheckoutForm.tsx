@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { findProduct } from '@/lib/catalog';
+import { MAX_QUANTITY } from '@/lib/cart';
 import type { CheckoutInput } from '@/lib/types';
 import { validateCheckout } from '@/lib/validateCheckout';
 import { useCart } from '@/components/Cart/CartProvider';
@@ -81,11 +82,6 @@ export function CheckoutForm() {
   const visibleError = (k: FieldKey): string | undefined =>
     errors[k] && (touched[k] || submitAttempted) ? errors[k] : undefined;
 
-  // Single-thumb summary for now: shows whichever item is first in the cart.
-  // Task 5 replaces this with a per-line list.
-  const firstItem = cart.items[0];
-  const firstProduct = firstItem ? findProduct(firstItem.sku) : undefined;
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (submitting) return;
@@ -114,28 +110,63 @@ export function CheckoutForm() {
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      <div className={styles.order}>
-        {firstProduct && (
-          <div className={styles.thumbBtn}>
-            <Image
-              src={firstProduct.imageSrc}
-              alt=""
-              fill
-              sizes="(min-width: 768px) 220px, 33vw"
-              className={styles.thumb}
-            />
-          </div>
-        )}
-
-        <div className={styles.orderInfo}>
-          <div className={styles.orderName}>
-            <span>TOO MUCH ЯРОМ TOO MUCH ДОЛИНОЮ</span>
-          </div>
-          <div className={`${styles.orderMeta} mono`}>
-            OVERSIZE · ОДИН РОЗМІР · ×{cart.totalQuantity}
-          </div>
-        </div>
-      </div>
+      <ul className={styles.orderList}>
+        {cart.items.map((item) => {
+          const product = findProduct(item.sku);
+          if (!product) return null;
+          return (
+            <li key={item.sku} className={styles.orderLine}>
+              <div className={styles.orderLineThumb}>
+                <Image
+                  src={product.imageSrc}
+                  alt=""
+                  fill
+                  sizes="80px"
+                  className={styles.orderLineImg}
+                />
+              </div>
+              <div className={styles.orderLineInfo}>
+                <div className={styles.orderLineName}>{item.name}</div>
+                <div className={`${styles.orderLineSpec} mono`}>OVERSIZE · ОДИН РОЗМІР</div>
+              </div>
+              <div className={styles.orderLineControls}>
+                <div className={styles.orderLineStepper}>
+                  <button
+                    type="button"
+                    className={styles.orderLineQtyBtn}
+                    onClick={() => {
+                      if (item.quantity <= 1) return;
+                      cart.setQty(item.sku, item.quantity - 1);
+                    }}
+                    aria-disabled={item.quantity <= 1}
+                    aria-label="Зменшити кількість"
+                  >
+                    −
+                  </button>
+                  <span className={styles.orderLineQty}>{item.quantity}</span>
+                  <button
+                    type="button"
+                    className={styles.orderLineQtyBtn}
+                    onClick={() => {
+                      if (item.quantity >= MAX_QUANTITY) return;
+                      cart.setQty(item.sku, item.quantity + 1);
+                    }}
+                    aria-disabled={item.quantity >= MAX_QUANTITY}
+                    aria-label="Збільшити кількість"
+                  >
+                    +
+                  </button>
+                </div>
+                <div className={styles.orderLineTotal}>{item.price * item.quantity} ₴</div>
+              </div>
+            </li>
+          );
+        })}
+        <li className={styles.orderGrandRow}>
+          <span className={`${styles.orderGrandLabel} mono`}>Разом</span>
+          <span className={styles.orderGrandTotal}>{cart.totalAmount} ₴</span>
+        </li>
+      </ul>
 
       <fieldset className={styles.block}>
         <Field

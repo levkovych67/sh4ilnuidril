@@ -1,0 +1,312 @@
+/* Real bold (900) for the title. BuyOverlay declares the Light (300) face;
+   adding Black (900) under the same family lets the browser pick per
+   font-weight — Light for the button, Black for the title. */
+@font-face {
+  font-family: 'KyivTypeSans';
+  src: url('/fonts-new/KyivTypeSans-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------- Overlay scrim ---------- */
+.overlay {
+  position: fixed; inset: 0; z-index: 60;
+  background-color: rgba(0, 0, 0, 0.55);
+}
+.overlay[data-state='open']    { animation: ovlIn 400ms ease both; }
+.overlay[data-state='closing'] { animation: ovlOut 320ms ease both; }
+@keyframes ovlIn  { from { background-color: rgba(0, 0, 0, 0); } }
+@keyframes ovlOut { to   { background-color: rgba(0, 0, 0, 0); } }
+
+/* ---------- Panel — mobile: bottom sheet ---------- */
+.panel {
+  position: fixed; inset: 0;
+  background: var(--ink); color: #c1baac;
+  display: flex; flex-direction: column;
+  border-radius: 0;
+  will-change: transform;
+  /* The modal text follows the v2 button's font. The @font-face for
+     'KyivTypeSans' lives in BuyOverlay.module.css and is already loaded by
+     the time the modal opens — declaring it here would just duplicate. */
+  font-family: 'KyivTypeSans', system-ui, sans-serif;
+}
+.panel[data-state='open']    { animation: sheetIn 480ms var(--ease-glide) both; }
+.panel[data-state='closing'] { animation: sheetOut 380ms var(--ease-glide) both; }
+@keyframes sheetIn  { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes sheetOut { from { transform: translateY(0); }    to { transform: translateY(100%); } }
+
+.grab { width: 38px; height: 4px; background: #3a3a3a; border-radius: 3px; margin: 9px auto 2px; }
+.scroll { flex: 1; overflow-y: auto; padding: 8px 22px 26px; }
+
+/* ---------- Panel — desktop: side panel from the right ---------- */
+@media (min-width: 768px) {
+  /* Panel sizing comes from the base rule (inset: 0) — fullscreen on both
+     mobile and desktop. Only the desktop-specific tweaks remain here. */
+  .panel[data-state='open']    { animation-name: panelIn; }
+  .panel[data-state='closing'] { animation-name: panelOut; }
+  .grab { display: none; }
+  .scroll { padding: 30px 34px 34px; }
+  /* Larger order-summary text on desktop, proportional to the bigger thumbs. */
+  .orderName { font-size: 18px; }
+  .orderMeta { font-size: 12px; }
+}
+@keyframes panelIn  { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes panelOut { from { transform: translateX(0); }    to { transform: translateX(100%); } }
+
+/* Grid 1fr | auto | 1fr — empty left track balances the X on the right,
+   so the title sits geometrically centred regardless of its width. */
+.head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+/* Overrides the `display` class (Montserrat + font-weight 900) coming from
+   globals.css. Light weight matches the rest of the modal and the button. */
+.title { font-size: 17px; font-family: 'KyivTypeSans', system-ui, sans-serif; grid-column: 2;
+  font-weight: 300; }
+.x {
+  grid-column: 3; justify-self: end;
+  width: 30px; height: 30px; background: none; border: 1.5px solid #444;
+  color: #9a9a9a; cursor: pointer;
+  transition: transform 140ms var(--ease-out), border-color 140ms ease, color 140ms ease;
+}
+.x:hover { border-color: #777; color: #c1baac; }
+.x:active { transform: scale(0.9); }
+
+/* ---------- form ---------- */
+.form { margin-top: 6px; }
+/* Photo on top filling the column, product name + meta centered below. */
+.order { display: flex; flex-direction: column; align-items: center; gap: 18px;
+  padding: 18px 0;
+  border-top: 1px solid #2a2a2a; border-bottom: 1px solid #2a2a2a; }
+.thumb { object-fit: cover; }
+/* Wraps the thumb so clicking opens the lightbox. Takes the full column
+   width up to 600px, kept square via aspect-ratio:1. position:relative
+   provides the containing block for the <Image fill> inside. */
+.thumbBtn { display: block; padding: 0; border: none; background: none;
+  cursor: zoom-in; line-height: 0;
+  width: 100%; max-width: 600px; aspect-ratio: 1;
+  position: relative; overflow: hidden; }
+.orderInfo { width: 100%; text-align: center; }
+.orderName { font-size: 12px; font-weight: 600; text-transform: uppercase; }
+.orderMeta { font-size: 9.5px; color: #c1baac; margin-top: 4px;
+  font-family: 'KyivTypeSans', system-ui, sans-serif; }
+.orderPrice { font-size: 22px; }
+.block { border: none; margin-top: 24px; }
+/* Drop the gap between adjacent fieldsets so the two .block groups read as
+   one continuous run of inputs (the .field margin-bottom keeps the field-
+   to-field spacing consistent across the boundary). */
+.block + .block { margin-top: 0; }
+.legend { font-size: 10px; color: #c1baac; margin-bottom: 16px; }
+.field { display: block; margin-bottom: 20px; position: relative; }
+.fieldLabel { font-size: 9px; color: #c1baac; display: block; margin-bottom: 9px;
+  font-family: 'KyivTypeSans', system-ui, sans-serif; }
+.input { width: 100%; background: none; border: none; border-bottom: 1.5px solid #c1baac;
+  padding-bottom: 9px; font-size: 15px; color: #c1baac; font-family: inherit;
+  transition: border-color 160ms ease; }
+.input:focus { outline: none; border-color: var(--red); }
+.fieldHint { font-size: 8px; color: #c1baac; margin-top: 8px; display: block;
+  font-family: 'KyivTypeSans', system-ui, sans-serif; }
+.pay { background: #c1baac; color: var(--ink); border: none; cursor: pointer;
+  font-family: var(--font-oswald); font-weight: 700; text-transform: uppercase;
+  font-size: 20px; padding: 19px;
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  transition: transform 150ms var(--ease-out), opacity 150ms ease; }
+.pay:disabled { opacity: .45; cursor: not-allowed; }
+.pay:not(:disabled):active { transform: scale(0.985); }
+
+/* Stepper row: [ − ] [ ── pay (flex:1) ── ] [ + ] */
+.payRow { display: flex; gap: 8px; margin-top: 28px; }
+.qtyBtn {
+  background: #c1baac; color: var(--ink); border: none; cursor: pointer;
+  font-family: var(--font-oswald); font-weight: 700;
+  font-size: 28px; line-height: 1; padding: 0;
+  width: 64px; flex: none;
+  transition: opacity 150ms ease, transform 150ms var(--ease-out),
+              background 150ms ease, color 150ms ease;
+}
+/* No hover color flip — stepper buttons keep their resting beige on every
+   interaction. The scale-press feedback stays for tactile confirmation. */
+.qtyBtn:not(:disabled):active { transform: scale(0.95); }
+.qtyBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Stepper "soft-disabled" — aria-disabled, not actual disabled, so the click
+   handler still fires and reveals form errors. Mirrors :disabled visuals. */
+.qtyBtn[aria-disabled='true'] { opacity: 0.35; cursor: not-allowed; }
+.qtyBtn[aria-disabled='true']:hover { background: #fff; color: var(--ink);
+  outline: none; }
+.qtyBtn[aria-disabled='true']:active { transform: none; }
+
+/* Same treatment for the pay button. */
+.pay[aria-disabled='true'] { opacity: .45; cursor: not-allowed; }
+.pay[aria-disabled='true']:active { transform: none; }
+
+/* Wraps the price text on the pay button so it can be a transform target
+   for the pulse animation (transforms don't apply to pure-inline boxes). */
+.payAmount { display: inline-block; transform-origin: center; }
+
+/* ---------- NovaPoshtaPicker additions (ported from /) ---------- */
+/* Inline field error shown under invalid inputs (after first submit). */
+.fieldError {
+  font-size: 8px; color: var(--red); margin-top: 8px; display: block;
+  letter-spacing: .03em; text-transform: uppercase;
+}
+/* Red underline on inputs marked invalid via the data-invalid attribute. */
+.input[data-invalid='true'] { border-color: var(--red); }
+
+/* Header inside the city autocomplete ("Популярні міста"). */
+.acHead {
+  padding: 9px 12px 5px; font-size: 8px; letter-spacing: .08em;
+  text-transform: uppercase; color: #6a6a6a;
+}
+/* Warehouse autocomplete row: name on the left, Поштомат/Відділення pill right. */
+.acRow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.acTag {
+  font-size: 7.5px; letter-spacing: .06em; text-transform: uppercase;
+  color: #9a9a9a; border: 1px solid #3a3a3a; padding: 2px 5px; flex: none;
+}
+
+/* City-search loading spinner. Wraps just the input so the spinner sits
+   absolute-right inside it; right-padding on the wrapped input keeps typed
+   text from running under the spinner. currentColor inherits the input's
+   text color so the spinner matches the modal's palette automatically. */
+.inputWrap { position: relative; }
+.inputWrap .input { padding-right: 22px; }
+.spinner {
+  position: absolute;
+  right: 0;
+  top: calc(50% - 7px);
+  width: 14px; height: 14px;
+  border: 1.5px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: spinnerSpin 720ms linear infinite;
+  pointer-events: none;
+}
+@keyframes spinnerSpin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+}
+
+.ac { position: absolute; left: 0; right: 0; top: 100%; margin-top: 2px;
+  background: #161616; border: 1px solid #303030; z-index: 5; list-style: none;
+  max-height: 180px; overflow-y: auto;
+  animation: acIn 220ms var(--ease-out) both;
+  transform-origin: top;
+}
+@keyframes acIn {
+  from { opacity: 0; transform: scaleY(0.94); }
+  to { opacity: 1; transform: scaleY(1); }
+}
+.acItem { padding: 10px 12px; font-size: 13px; color: #cfcfcf; cursor: pointer;
+  border-bottom: 1px solid #242424; transition: background 120ms ease, color 120ms ease; }
+.acItem:hover { background: #1f1f1f; color: #c1baac; }
+
+/* ---------- staggered content entrance ---------- */
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.order, .block, .payRow { animation: riseIn 440ms var(--ease-out) backwards; }
+.order { animation-delay: 170ms; }
+.block:nth-of-type(1) { animation-delay: 230ms; }
+.block:nth-of-type(2) { animation-delay: 290ms; }
+.payRow { animation-delay: 350ms; }
+
+/* Reduced motion — the panel slide is kept intentionally: it conveys where
+   the sheet comes from and is an explicit product requirement. Only the
+   decorative content stagger is dropped. */
+@media (prefers-reduced-motion: reduce) {
+  .order, .block, .payRow { animation: none; }
+  .zoomBackdrop, .zoomImage { animation: none; }
+}
+
+/* ---------- photo lightbox (rendered in a body-level portal so it escapes
+   the modal panel's transform-induced containing block) ---------- */
+.zoomBackdrop {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(13, 13, 13, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  cursor: zoom-out;
+  animation: zoomFadeIn 220ms var(--ease-out) both;
+}
+.zoomImage {
+  max-width: 100%; max-height: 100%;
+  object-fit: contain;
+  display: block;
+  cursor: default;
+  animation: zoomScaleIn 280ms var(--ease-out) both;
+}
+@keyframes zoomFadeIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes zoomScaleIn { from { opacity: 0; transform: scale(0.94); }
+                         to   { opacity: 1; transform: scale(1); } }
+
+/* ---------- Order list (multi-product) ---------- */
+.orderList {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  border-top: 1px solid #2a2a2a;
+}
+
+.orderLine {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid #2a2a2a;
+  align-items: center;
+}
+
+.orderLineThumb { position: relative; width: 80px; height: 80px; overflow: hidden; }
+.orderLineImg { object-fit: cover; }
+
+.orderLineInfo { min-width: 0; }
+.orderLineName {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #c1baac;
+}
+.orderLineSpec { font-size: 9px; color: #c1baac; margin-top: 6px; }
+
+.orderLineControls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.orderLineStepper { display: flex; align-items: center; gap: 6px; }
+.orderLineQtyBtn {
+  width: 30px; height: 30px;
+  background: transparent; color: #c1baac;
+  border: 1px solid #3a3a3a;
+  cursor: pointer;
+  font-size: 16px; line-height: 1;
+  transition: border-color 140ms ease, transform 140ms var(--ease-out);
+}
+.orderLineQtyBtn:hover:not([aria-disabled='true']) { border-color: #c1baac; }
+.orderLineQtyBtn:active:not([aria-disabled='true']) { transform: scale(0.95); }
+.orderLineQtyBtn[aria-disabled='true'] { opacity: 0.35; cursor: not-allowed; }
+.orderLineQty {
+  font-size: 14px;
+  min-width: 22px;
+  text-align: center;
+  color: #c1baac;
+}
+.orderLineTotal { font-size: 14px; color: #c1baac; }
+
+/* Grand total row uses the same border treatment as a line. */
+.orderGrandRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 16px 0 4px;
+}
+.orderGrandLabel { font-size: 10px; color: #c1baac; }
+.orderGrandTotal { font-size: 22px; color: #c1baac; }
