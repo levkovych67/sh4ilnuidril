@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -16,6 +17,19 @@ import {
   totalQuantity as sumQty,
   type CartItem,
 } from '@/lib/cart';
+
+const STORAGE_KEY = 'sasha-cart-v1';
+
+function isCartItem(value: unknown): value is CartItem {
+  if (!value || typeof value !== 'object') return false;
+  const v = value as Record<string, unknown>;
+  return (
+    typeof v.sku === 'string' &&
+    typeof v.name === 'string' &&
+    typeof v.price === 'number' &&
+    typeof v.quantity === 'number'
+  );
+}
 
 interface CartContextValue {
   items: CartItem[];
@@ -41,6 +55,31 @@ export function useCart() {
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Load on mount. Initial state is [] (matches SSR) — we hydrate after mount
+  // to avoid React hydration mismatch warnings. Silent on any failure
+  // (private mode, quota, corrupt JSON) — in-memory cart still works.
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const parsed: unknown = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.every(isCartItem)) {
+        setItems(parsed);
+      }
+    } catch {
+      /* keep empty cart */
+    }
+  }, []);
+
+  // Save on every change.
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    } catch {
+      /* in-memory only */
+    }
+  }, [items]);
 
   const add = useCallback(
     (item: Omit<CartItem, 'quantity'>, qty: number = 1) =>
