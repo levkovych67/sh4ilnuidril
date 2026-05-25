@@ -41,3 +41,41 @@
 @media (min-width: 768px) {
   .slideVideo { object-position: 50% 25%; }
 }
+
+/* ---------- Pagination dots ---------- */
+.dots {
+  position: absolute;
+  bottom: 16px;
+  left: 0; right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  z-index: 2;
+  pointer-events: none;
+}
+.dot {
+  pointer-events: auto;
+  width: 8px; height: 8px;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid #c1baac;
+  cursor: pointer;
+  transition: background 200ms ease, width 200ms ease, border-radius 200ms ease;
+}
+.dot[aria-current='true'] {
+  background: #c1baac;
+  width: 18px;
+  border-radius: 9px;
+}
+.dot:focus-visible {
+  outline: 2px solid #c1baac;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot { transition: none; }
+}
+@media (min-width: 768px) {
+  .dots { bottom: 24px; }
+}
