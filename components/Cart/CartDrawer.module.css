@@ -76,3 +76,90 @@
   transition: background 160ms ease, color 160ms ease;
 }
 .emptyAdd:hover { background: #c1baac; color: var(--ink); }
+
+/* ---------- Line items ---------- */
+.list { list-style: none; margin: 18px 0 0; padding: 0; }
+.line {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid #2a2a2a;
+  align-items: center;
+}
+.line:first-child { border-top: 1px solid #2a2a2a; }
+
+.lineThumb { position: relative; width: 80px; height: 80px; overflow: hidden; }
+.lineImg { object-fit: cover; }
+
+.lineInfo { min-width: 0; }
+.lineName {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #c1baac;
+}
+.lineSpec { font-size: 9px; color: #c1baac; margin-top: 6px; }
+
+.lineControls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+.stepper { display: flex; align-items: center; gap: 6px; }
+.qtyBtn {
+  width: 30px; height: 30px;
+  background: transparent; color: #c1baac;
+  border: 1px solid #3a3a3a;
+  cursor: pointer;
+  font-size: 16px; line-height: 1;
+  transition: border-color 140ms ease, transform 140ms var(--ease-out);
+}
+.qtyBtn:hover:not([aria-disabled='true']) { border-color: #c1baac; }
+.qtyBtn:active:not([aria-disabled='true']) { transform: scale(0.95); }
+.qtyBtn[aria-disabled='true'] { opacity: 0.35; cursor: not-allowed; }
+.qty {
+  font-size: 14px;
+  min-width: 22px;
+  text-align: center;
+  color: #c1baac;
+}
+
+.lineTotal { font-size: 14px; color: #c1baac; }
+.lineRemove {
+  background: transparent; border: none;
+  color: #6a6a6a; cursor: pointer;
+  font-size: 16px; line-height: 1;
+  padding: 0;
+  transition: color 140ms ease;
+}
+.lineRemove:hover { color: var(--red); }
+
+/* ---------- Footer ---------- */
+.footer {
+  padding: 16px 22px 22px;
+  border-top: 1px solid #2a2a2a;
+  background: var(--ink);
+}
+@media (min-width: 768px) {
+  .footer { padding: 18px 34px 26px; }
+}
+.totalRow {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.totalLabel { font-size: 10px; color: #c1baac; }
+.totalAmount { font-size: 24px; color: #c1baac; }
+.checkout {
+  width: 100%;
+  background: #c1baac; color: var(--ink);
+  border: none; cursor: pointer;
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700; text-transform: uppercase;
+  font-size: 20px;
+  padding: 19px;
+  transition: transform 150ms var(--ease-out), opacity 150ms ease;
+}
+.checkout:not([aria-disabled='true']):active { transform: scale(0.985); }
+.checkout[aria-disabled='true'] { opacity: 0.35; cursor: not-allowed; }
