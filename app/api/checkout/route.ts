@@ -12,6 +12,7 @@ import { MAX_QUANTITY } from '@/lib/cart';
 
 interface LineItem {
   product: Product;
+  size: string;
   quantity: number;
 }
 
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
       }
       throw err;
     }
-    lineItems.push({ product, quantity: Math.min(MAX_QUANTITY, line.quantity) });
+    lineItems.push({ product, size: line.size, quantity: Math.min(MAX_QUANTITY, line.quantity) });
   }
 
   const merchantAccount = requireEnv('WAYFORPAY_MERCHANT_ACCOUNT');
@@ -56,7 +57,11 @@ export async function POST(req: NextRequest) {
   const orderDate = Math.floor(Date.now() / 1000);
   const [lastName, ...firstParts] = input.fullName.trim().split(/\s+/);
 
-  const productName = lineItems.map((li) => `Футболка - ${li.product.productName}`);
+  const productName = lineItems.map((li) =>
+    li.size
+      ? `Футболка - ${li.product.productName} (Розмір: ${li.size})`
+      : `Футболка - ${li.product.productName}`,
+  );
   const productCount = lineItems.map((li) => li.quantity);
   const productPrice = lineItems.map((li) => li.product.productPrice);
   const amount = lineItems.reduce((s, li) => s + li.product.productPrice * li.quantity, 0);
