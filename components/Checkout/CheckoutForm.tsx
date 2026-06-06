@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
-import { MAX_QUANTITY } from '@/lib/cart';
+import { MAX_QUANTITY, lineKey } from '@/lib/cart';
 import type { CheckoutInput } from '@/lib/types';
 import { validateCheckout } from '@/lib/validateCheckout';
 import { useCart } from '@/components/Cart/CartProvider';
@@ -51,7 +51,7 @@ export function CheckoutForm() {
   const [touched, setTouched] = useState<Partial<Record<FieldKey, boolean>>>({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
-  const items = cart.items.map((i) => ({ sku: i.sku, quantity: i.quantity }));
+  const items = cart.items.map((i) => ({ sku: i.sku, size: i.size, quantity: i.quantity }));
   const data: CheckoutInput = { ...local, items };
 
   const markTouched = (k: FieldKey) =>
@@ -113,8 +113,9 @@ export function CheckoutForm() {
           const product = cart.productsBySku.get(item.sku);
           if (!product) return null;
           const thumbUrl = product.productPictures[0]?.url;
+          const key = lineKey(item);
           return (
-            <li key={item.sku} className={styles.orderLine}>
+            <li key={key} className={styles.orderLine}>
               <div className={styles.orderLineThumb}>
                 {thumbUrl && (
                   <Image
@@ -128,7 +129,9 @@ export function CheckoutForm() {
               </div>
               <div className={styles.orderLineInfo}>
                 <div className={styles.orderLineName}>{item.name}</div>
-                <div className={`${styles.orderLineSpec} mono`}>OVERSIZE · ОДИН РОЗМІР</div>
+                <div className={`${styles.orderLineSpec} mono`}>
+                  {item.size ? `РОЗМІР · ${item.size}` : 'ОДИН РОЗМІР'}
+                </div>
               </div>
               <div className={styles.orderLineControls}>
                 <div className={styles.orderLineStepper}>
@@ -137,7 +140,7 @@ export function CheckoutForm() {
                     className={styles.orderLineQtyBtn}
                     onClick={() => {
                       if (item.quantity <= 1) return;
-                      cart.setQty(item.sku, item.quantity - 1);
+                      cart.setQty(key, item.quantity - 1);
                     }}
                     aria-disabled={item.quantity <= 1}
                     aria-label="Зменшити кількість"
@@ -150,7 +153,7 @@ export function CheckoutForm() {
                     className={styles.orderLineQtyBtn}
                     onClick={() => {
                       if (item.quantity >= MAX_QUANTITY) return;
-                      cart.setQty(item.sku, item.quantity + 1);
+                      cart.setQty(key, item.quantity + 1);
                     }}
                     aria-disabled={item.quantity >= MAX_QUANTITY}
                     aria-label="Збільшити кількість"
