@@ -4,7 +4,7 @@ import { useEffect, useId, useState } from 'react';
 import Image from 'next/image';
 import { useCart } from './CartProvider';
 import { useCheckout } from '@/components/Checkout/CheckoutProvider';
-import { MAX_QUANTITY } from '@/lib/cart';
+import { MAX_QUANTITY, lineKey } from '@/lib/cart';
 import styles from './CartDrawer.module.css';
 
 const EXIT_MS = 420;
@@ -83,8 +83,9 @@ export function CartDrawer() {
                 const product = productsBySku.get(item.sku);
                 if (!product) return null;
                 const thumbUrl = product.productPictures[0]?.url;
+                const key = lineKey(item);
                 return (
-                  <li key={item.sku} className={styles.line}>
+                  <li key={key} className={styles.line}>
                     <div className={styles.lineThumb}>
                       {thumbUrl && (
                         <Image
@@ -98,7 +99,9 @@ export function CartDrawer() {
                     </div>
                     <div className={styles.lineInfo}>
                       <div className={styles.lineName}>{item.name}</div>
-                      <div className={`${styles.lineSpec} mono`}>OVERSIZE · ОДИН РОЗМІР</div>
+                      <div className={`${styles.lineSpec} mono`}>
+                        {item.size ? `РОЗМІР · ${item.size}` : 'ОДИН РОЗМІР'}
+                      </div>
                     </div>
                     <div className={styles.lineControls}>
                       <div className={styles.stepper}>
@@ -107,7 +110,7 @@ export function CartDrawer() {
                           className={styles.qtyBtn}
                           onClick={() => {
                             if (item.quantity <= 1) return;
-                            setQty(item.sku, item.quantity - 1);
+                            setQty(key, item.quantity - 1);
                           }}
                           aria-disabled={item.quantity <= 1}
                           aria-label="Зменшити кількість"
@@ -120,7 +123,7 @@ export function CartDrawer() {
                           className={styles.qtyBtn}
                           onClick={() => {
                             if (item.quantity >= MAX_QUANTITY) return;
-                            setQty(item.sku, item.quantity + 1);
+                            setQty(key, item.quantity + 1);
                           }}
                           aria-disabled={item.quantity >= MAX_QUANTITY}
                           aria-label="Збільшити кількість"
@@ -132,7 +135,7 @@ export function CartDrawer() {
                       <button
                         type="button"
                         className={styles.lineRemove}
-                        onClick={() => remove(item.sku)}
+                        onClick={() => remove(key)}
                         aria-label="Видалити з кошика"
                       >
                         ×

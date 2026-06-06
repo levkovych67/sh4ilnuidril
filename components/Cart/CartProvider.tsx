@@ -19,7 +19,7 @@ import {
 } from '@/lib/cart';
 import type { Product } from '@/lib/products';
 
-const STORAGE_KEY = 'sasha-cart-v1';
+const STORAGE_KEY = 'sasha-cart-v2';
 
 function isCartItem(value: unknown): value is CartItem {
   if (!value || typeof value !== 'object') return false;
@@ -28,6 +28,7 @@ function isCartItem(value: unknown): value is CartItem {
     typeof v.sku === 'string' &&
     typeof v.name === 'string' &&
     typeof v.price === 'number' &&
+    typeof v.size === 'string' &&
     typeof v.quantity === 'number'
   );
 }
@@ -35,8 +36,8 @@ function isCartItem(value: unknown): value is CartItem {
 interface CartContextValue {
   items: CartItem[];
   add: (item: Omit<CartItem, 'quantity'>, qty?: number) => void;
-  setQty: (sku: string, qty: number) => void;
-  remove: (sku: string) => void;
+  setQty: (key: string, qty: number) => void;
+  remove: (key: string) => void;
   clear: () => void;
   totalQuantity: number;
   totalAmount: number;
@@ -98,11 +99,11 @@ export function CartProvider({
     [],
   );
   const setQty = useCallback(
-    (sku: string, qty: number) => setItems((prev) => setQuantity(prev, sku, qty)),
+    (key: string, qty: number) => setItems((prev) => setQuantity(prev, key, qty)),
     [],
   );
   const remove = useCallback(
-    (sku: string) => setItems((prev) => removeItem(prev, sku)),
+    (key: string) => setItems((prev) => removeItem(prev, key)),
     [],
   );
   const clear = useCallback(() => setItems([]), []);
