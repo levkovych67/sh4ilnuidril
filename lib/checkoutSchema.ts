@@ -5,6 +5,7 @@ import { z } from 'zod';
  *  from tampering with the price. */
 const lineItemSchema = z.object({
   sku: z.string().min(1),
+  size: z.string(),
   quantity: z.number().int().min(1, 'Кількість має бути не менше 1'),
 });
 

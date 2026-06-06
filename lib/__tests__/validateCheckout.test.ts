@@ -6,7 +6,7 @@ const valid: CheckoutInput = {
   fullName: 'Іван Іванов',
   phone: '+380671234567',
   email: 'a@b.com',
-  items: [{ sku: 'DROP01-OVERSIZE', quantity: 1 }],
+  items: [{ sku: 'DROP01-OVERSIZE', size: 'M', quantity: 1 }],
   city: 'Львів',
   cityRef: 'ref-1',
   deliveryType: 'warehouse',

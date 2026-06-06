@@ -5,7 +5,7 @@ const base = {
   fullName: 'Чемеров Олександр',
   phone: '+380671234567',
   email: 'a@b.com',
-  items: [{ sku: 'DROP01-OVERSIZE', quantity: 1 }],
+  items: [{ sku: 'DROP01-OVERSIZE', size: 'M', quantity: 1 }],
   city: 'Львів',
   cityRef: 'ref-1',
   deliveryType: 'warehouse' as const,
@@ -36,11 +36,29 @@ describe('checkoutSchema', () => {
     const multi = {
       ...base,
       items: [
-        { sku: 'DROP01-OVERSIZE', quantity: 1 },
-        { sku: 'DROP01-PRODUCT2', quantity: 2 },
+        { sku: 'DROP01-OVERSIZE', size: 'M', quantity: 1 },
+        { sku: 'DROP01-PRODUCT2', size: '', quantity: 2 },
       ],
     };
     expect(checkoutSchema.safeParse(multi).success).toBe(true);
+  });
+
+  it('rejects a line missing the size key', () => {
+    expect(
+      checkoutSchema.safeParse({
+        ...base,
+        items: [{ sku: 'DROP01-OVERSIZE', quantity: 1 }],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('accepts an empty-string size (one-size product)', () => {
+    expect(
+      checkoutSchema.safeParse({
+        ...base,
+        items: [{ sku: 'DROP01-OVERSIZE', size: '', quantity: 1 }],
+      }).success,
+    ).toBe(true);
   });
 
   it('rejects an empty items array with the Ukrainian message', () => {
