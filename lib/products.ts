@@ -16,6 +16,7 @@ export const ProductSchema = z.object({
   productVideoPosterUrl: z.string().min(1),
   productPictures: z.array(PictureSchema).min(1),
   productBrand: z.string(),
+  productSizes: z.array(z.string()).default([]),
   productAvailability: z.enum(['in_stock', 'sold_out']),
   productButtonLabel: z.string(),
   productButtonBackgroundColor: z.string(),

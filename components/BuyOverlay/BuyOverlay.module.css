@@ -85,3 +85,28 @@
     padding: 28px 68px;
   }
 }
+
+.sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.sizePill {
+  min-width: 44px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fafafa;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sizePill[data-selected='true'] {
+  background: #fafafa;
+  color: #000;
+  border-color: #fafafa;
+}
