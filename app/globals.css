@@ -1,0 +1,94 @@
+:root {
+  --bg: #FAFAFA;
+  --ink: #0D0D0D;
+  --red: #F14933;
+  --grey: #7A7A7A;
+  --maxw: 1280px;
+
+  /* Easing — strong custom curves (built-in CSS easings are too weak) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Gentle ease-out — motion stays visible across the whole duration
+     (the "drawer" curve front-loads too hard and reads as a pop) */
+  --ease-glide: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Only html carries the base colour. body stays transparent so the fixed
+   thorns watermark (body::before, z-index:-1) is not painted over by the
+   body box's own background. */
+html { background: var(--bg); color: var(--ink); }
+
+body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+  /* clip (not hidden) — guards against horizontal scroll on mobile
+     without breaking the sticky header */
+  overflow-x: clip;
+}
+
+/* Parallax thorns watermark — a fixed layer behind the transparent white
+   sections. Phones fetch only bg-phone, desktops only bg-web (the browser
+   never downloads a background-image whose media query does not match). */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: url('/bg-phone.webp');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  opacity: 0.16;
+}
+@media (min-width: 768px) {
+  body::before { background-image: url('/bg-web.webp'); }
+}
+@keyframes bgDrift {
+  from { transform: translateY(-2.5%) scale(1.08); }
+  to   { transform: translateY(2.6%) scale(1.08); }
+}
+/* Scroll-driven drift — the watermark glides as the page scrolls.
+   Falls back to a plain fixed layer where scroll timelines are unsupported. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    body::before {
+      animation: bgDrift linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+a { color: inherit; }
+
+button { -webkit-tap-highlight-color: transparent; }
+
+.mono {
+  font-family: var(--font-mono), monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.poster {
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 0.82;
+  letter-spacing: 0.004em;
+}
+
+.display {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
